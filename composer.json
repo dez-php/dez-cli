@@ -1,0 +1,23 @@
+{
+  "name": "dez-php/dez-cli",
+  "description": "Cli Component",
+  "keywords": ["php cli","cli","dez-php cli"],
+  "authors": [
+    {
+      "name": "Ivan Gontarenko",
+      "email": "vania.gontarenko@gmail.com"
+    }
+  ],
+  "license": "MIT",
+  "type": "library",
+  "minimum-stability": "dev",
+  "prefer-stable" : true,
+  "require": {
+    "php": ">=5.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "Dez\\Cli\\": "src/Cli"
+    }
+  }
+}
