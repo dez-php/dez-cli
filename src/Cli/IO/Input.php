@@ -91,6 +91,45 @@
             return $this;
         }
 
+        /**
+         * @param $name
+         * @return bool
+         */
+        public function hasOption( $name ) {
+            return isset( $this->options[ $name ] );
+        }
+
+        /**
+         * @param $name
+         * @param null $default
+         * @return array|null
+         */
+        public function getOption( $name, $default = null ) {
+            return $this->hasOption( $name ) ? $this->options[$name] : $default;
+        }
+
+        /**
+         * @param $name
+         * @param null $default
+         * @return array|null
+         */
+        public function getArgument( $name, $default = null ) {
+            $arguments  = is_int( $name ) ? array_values( $this->arguments ) : $this->arguments;
+            return $this->hasArgument( $name ) ? $arguments : $default;
+        }
+
+        /**
+         * @param $name
+         * @return bool
+         */
+        public function hasArgument( $name ) {
+            $arguments  = is_int( $name ) ? array_values( $this->arguments ) : $this->arguments;
+            return isset( $arguments[ $name ] );
+        }
+
+        /**
+         * @return mixed
+         */
         abstract protected function parse();
 
     }

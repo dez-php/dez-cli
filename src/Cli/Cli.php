@@ -2,6 +2,10 @@
 
     namespace Dez\Cli;
 
+    use Dez\Cli\Command\Command;
+    use Dez\Cli\IO\Definition;
+    use Dez\Cli\IO\Input\Argument;
+
     /**
      * Class Cli
      * @package Dez\Cli
@@ -21,22 +25,27 @@
         /**
          * @var
          */
-        protected $description;
-
-        /**
-         * @var
-         */
         protected $definition;
 
+        public function __construct() {
+
+            $this->setDefinition( new Definition( [
+                new Argument( 'command', Argument::REQUIRED, 'Command to execute' )
+            ] ) );
+
+        }
+
         public function register( $name ) {
-            $this->add( $name );
+            $command    = new Command( $name );
+            $this->add( $command );
+            return $command;
         }
 
         /**
          * @param $command
          */
-        public function add( $command ) {
-
+        public function add( Command $command ) {
+            $this->commands[ $command->getName() ]  = $command;
         }
 
         /**
@@ -86,22 +95,6 @@
         /**
          * @return mixed
          */
-        public function getDescription() {
-            return $this->description;
-        }
-
-        /**
-         * @param mixed $description
-         * @return static
-         */
-        public function setDescription( $description )  {
-            $this->description = $description;
-            return $this;
-        }
-
-        /**
-         * @return mixed
-         */
         public function getDefinition() {
             return $this->definition;
         }
@@ -110,7 +103,7 @@
          * @param mixed $definition
          * @return static
          */
-        public function setDefinition( $definition ) {
+        public function setDefinition( Definition $definition ) {
             $this->definition = $definition;
             return $this;
         }
