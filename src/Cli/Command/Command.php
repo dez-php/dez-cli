@@ -4,10 +4,8 @@
 
     use Dez\Cli\Cli;
     use Dez\Cli\CliException;
-    use Dez\Cli\IO\Definition;
-    use Dez\Cli\IO\Input\Argument;
-    use Dez\Cli\IO\Input\Option;
-    use Dez\Cli\IO\InputArgv;
+    use Dez\Cli\IO\InputArgument;
+    use Dez\Cli\IO\InputOption;
 
     class Command {
 
@@ -19,19 +17,33 @@
 
         protected $application;
 
-        public function __construct( $name ) {
+        protected $configuration;
+
+        public function __construct( $name, array $configuration = [] ) {
+            $this->setConfiguration( new CommandConfiguration(
+                $configuration
+            ) )->getConfiguration()->setName( $name );
             $this->setName( $name );
             $this->configure();
         }
 
+        /**
+         *
+         */
         public function configure() {
 
         }
 
+        /**
+         * @throws CliException
+         */
         public function execute() {
             throw new CliException( 'Calling execute() can be from extended command' );
         }
 
+        /**
+         * @return $this
+         */
         public function run() {
 
             try {
@@ -43,24 +55,35 @@
             return $this;
         }
 
+        /**
+         * @return $this
+         * @throws CliException
+         */
         protected function runCommand() {
 
             $this->initialize();
 
-            $input  = $this->getApplication()->getInput();
+            $input              = $this->getApplication()->getInput();
+            $output             = $this->getApplication()->getOutput();
 
-            var_dump($input);die;
+            $configuration      = $this->getConfiguration();
 
-            $definition     = $this->getDefinition();
-
-            foreach( $definition->getArguments() as $i => $argument ) {
-                if( ! $input->hasArgument( $i ) && $argument->getMode() & Argument::REQUIRED ) {
+            foreach( $configuration->getArguments() as $name => $argument ) {
+                if(
+                    $argument->getMode() & InputArgument::REQUIRED &&
+                    ! $input->hasArgument( $argument->getPosition() )
+                ) {
                     throw new CliException( sprintf( 'Required argument "%s" not found', $argument->getName() ) );
                 }
             }
 
-            foreach( $definition->getOptions() as $option ) {
-                if( ! $input->hasOption( $option->getName() ) && $option->getMode() & Argument::REQUIRED ) {
+            foreach( $configuration->getOptions() as $option ) {
+                if(
+                    $option->getMode() & InputOption::REQUIRED && (
+                        ! $input->hasOption( $option->getName() ) &&
+                        ! $input->hasOption( $option->getShort() )
+                    )
+                ) {
                     throw new CliException( sprintf( 'Required option "%s" not found', $option->getName() ) );
                 }
             }
@@ -70,10 +93,7 @@
             if( ! $callback ) {
                 $this->execute();
             } else if( $callback instanceof \Closure ) {
-                call_user_func_array( $callback, [
-                    $this->getApplication()->getInput(),
-                    $this->getApplication()->getOutput()
-                ] );
+                call_user_func_array( $callback, [ $input, $output ] );
             } else {
                 throw new CliException( 'Bad callback function. Set only callback function of Closure instance' );
             }
@@ -82,6 +102,10 @@
 
         }
 
+        /**
+         * @param \Exception $exception
+         * @return $this
+         */
         protected function renderException( \Exception $exception ) {
 
             $output     = $this->getApplication()->getOutput();
@@ -131,6 +155,10 @@
             return $this;
         }
 
+        /**
+         * @return $this
+         * @throws CliException
+         */
         protected function initialize() {
 
             $application    = $this->getApplication();
@@ -142,13 +170,26 @@
             return $this;
         }
 
+        /**
+         * @param $name
+         * @param null $short
+         * @param int $mode
+         * @param string $description
+         * @return $this
+         */
         public function addOption( $name, $short = null, $mode = 0, $description = '' ) {
-            $this->getDefinition()->addOption( new Option( $name, $short, $mode, $description ) );
+            $this->getConfiguration()->addOption( new InputOption( $name, $short, $mode, $description ) );
             return $this;
         }
 
+        /**
+         * @param $name
+         * @param int $mode
+         * @param string $description
+         * @return $this
+         */
         public function addArgument( $name, $mode = 0, $description = '' ) {
-            $this->getDefinition()->addArgument( new Argument( $name, $mode, $description ) );
+            $this->getConfiguration()->addArgument( new InputArgument( $name, $mode, $description ) );
             return $this;
         }
 
@@ -201,22 +242,6 @@
         }
 
         /**
-         * @return Definition
-         */
-        public function getDefinition() {
-            return $this->definition;
-        }
-
-        /**
-         * @param Definition $definition
-         * @return static
-         */
-        public function setDefinition( Definition $definition ) {
-            $this->definition = $definition;
-            return $this;
-        }
-
-        /**
          * @return Cli
          */
         public function getApplication() {
@@ -229,6 +254,22 @@
          */
         public function setApplication( Cli $application ) {
             $this->application = $application;
+            return $this;
+        }
+
+        /**
+         * @return CommandConfiguration
+         */
+        public function getConfiguration() {
+            return $this->configuration;
+        }
+
+        /**
+         * @param CommandConfiguration $configuration
+         * @return static
+         */
+        public function setConfiguration( CommandConfiguration $configuration ) {
+            $this->configuration = $configuration;
             return $this;
         }
 

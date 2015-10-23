@@ -2,15 +2,20 @@
 
     namespace Dez\Cli\IO;
 
+    /**
+     * Class InputArgv
+     * @package Dez\Cli\IO
+     */
     class InputArgv extends Input {
 
+        /**
+         * @return $this
+         */
         protected function parse() {
 
             $tokens  = $this->getTokens();
 
             if( count( $tokens ) > 0 ) {
-
-                $index  = 0;
 
                 for( $index = 0, $length = count( $tokens ); $index < $length; $index++ ) {
 
@@ -18,17 +23,18 @@
 
                     if( strpos( $token, '--' ) === 0 && $token !== '--' ) {
 
-                        list( $name, $value )   = explode( '=', $token );
+                        $token      = explode( '=', $token );
+                        $name       = $token[0];
+                        $value      = ! isset( $token[1] ) ? true : trim( $token[1], '\'"' );
+
                         $this->setOption( substr( $name, 2 ), $value );
 
                     } else if ( strpos( $token, '-' ) === 0 && $token !== '-' ) {
 
                         $name       = substr( $token, 1 );
-                        $nextValue  = $tokens[ $index + 1 ];
-
-                        if( $nextValue !== null && strpos( $nextValue, '-' ) !== 0 ) {
+                        if( isset( $tokens[ $index + 1 ] ) && strpos( $tokens[ $index + 1 ], '-' ) !== 0 ) {
+                            $this->setOption( $name[0], $tokens[ $index + 1 ] );
                             $index++;
-                            $this->setOption( $name[0], $nextValue );
                         } else {
                             $this->setOption( $name[0], substr( $name, 1 ) );
                         }

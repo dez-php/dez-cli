@@ -50,6 +50,19 @@
         }
 
         /**
+         * @return $this
+         */
+        public function execute() {
+            if( $this->has( $this->getInput()->getCommand() ) ) {
+                $this->get( $this->getInput()->getCommand() )->run();
+            } else {
+                $this->notFoundCommand();
+            }
+
+            return $this;
+        }
+
+        /**
          * @param $name
          * @return Command
          */
@@ -75,7 +88,15 @@
         }
 
         /**
-         * @return array
+         * @param $name
+         * @return null|Command
+         */
+        public function get( $name ) {
+            return $this->has( $name ) ? $this->commands[ $name ] : null;
+        }
+
+        /**
+         * @return Command[]
          */
         public function getCommands() {
             return $this->commands;
@@ -139,6 +160,28 @@
          */
         public function setOutput( Output $output ) {
             $this->output = $output;
+            return $this;
+        }
+
+        /**
+         * @return $this
+         */
+        protected function notFoundCommand() {
+            $output     = $this->getOutput();
+
+            $output->writeln()->writeln( sprintf(
+                '[error]  %s  [/error]', "Command not '{$this->getInput()->getCommand()}' not found"
+            ) )->writeln();
+
+            $output->writeln( '[info]Available commands![/info]' )->writeln();
+
+            foreach( $this->getCommands() as $command ) {
+                $commandInfo    = '[success]  - %s [/success](%s)';
+                $output->writeln( sprintf( $commandInfo, $command->getName(), $command->getDescription() ) );
+            }
+
+            $output->writeln();
+
             return $this;
         }
 

@@ -1,14 +1,14 @@
 <?php
 
-    namespace Dez\Cli\IO\Input;
+    namespace Dez\Cli\IO;
 
     use Dez\Cli\CliException;
 
     /**
      * Class Option
-     * @package Dez\Cli\IO\Input
+     * @package Dez\Cli\IO
      */
-    class Option {
+    class InputOption {
 
         const REQUIRED  = 1;
 

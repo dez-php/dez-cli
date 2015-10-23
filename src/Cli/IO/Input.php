@@ -8,17 +8,24 @@
      */
     abstract class Input {
 
-        protected $runningFile  = '';
+        protected $runningFile      = '';
 
-        protected $tokens       = [];
+        protected $command          = '';
 
-        protected $arguments    = [];
+        protected $arguments        = [];
 
-        protected $options      = [];
+        protected $options          = [];
+
+        static protected $tokens    = [];
 
         public function __construct() {
             $arguments  = $_SERVER['argv'];
             $this->setRunningFile( array_shift( $arguments ) );
+
+            if( isset( $arguments[0] ) ) {
+                $this->setCommand( array_shift( $arguments ) );
+            }
+
             $this->setTokens( $arguments );
             $this->parse();
         }
@@ -26,8 +33,7 @@
         /**
          * @return string
          */
-        public function getRunningFile()
-        {
+        public function getRunningFile() {
             return $this->runningFile;
         }
 
@@ -41,10 +47,26 @@
         }
 
         /**
+         * @return string
+         */
+        public function getCommand() {
+            return $this->command;
+        }
+
+        /**
+         * @param string $command
+         * @return static
+         */
+        public function setCommand( $command ) {
+            $this->command = $command;
+            return $this;
+        }
+
+        /**
          * @return array
          */
         public function getTokens() {
-            return $this->tokens;
+            return static::$tokens;
         }
 
         /**
@@ -52,25 +74,7 @@
          * @return static
          */
         public function setTokens( $tokens ) {
-            $this->tokens = $tokens;
-            return $this;
-        }
-
-        /**
-         * @return array
-         */
-        public function getArguments()
-        {
-            return $this->arguments;
-        }
-
-        /**
-         * @param $name
-         * @param $argument
-         * @return static
-         */
-        public function setArgument( $name, $argument ) {
-            $this->arguments[$name] = $argument;
+            static::$tokens = $tokens;
             return $this;
         }
 
@@ -109,13 +113,30 @@
         }
 
         /**
+         * @return array
+         */
+        public function getArguments() {
+            return $this->arguments;
+        }
+
+        /**
+         * @param $name
+         * @param $argument
+         * @return static
+         */
+        public function setArgument( $name, $argument ) {
+            $this->arguments[$name] = $argument;
+            return $this;
+        }
+
+        /**
          * @param $name
          * @param null $default
          * @return array|null
          */
         public function getArgument( $name, $default = null ) {
             $arguments  = is_int( $name ) ? array_values( $this->arguments ) : $this->arguments;
-            return $this->hasArgument( $name ) ? $arguments : $default;
+            return $this->hasArgument( $name ) ? $arguments[ $name ] : $default;
         }
 
         /**
