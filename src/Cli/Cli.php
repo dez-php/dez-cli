@@ -4,7 +4,11 @@
 
     use Dez\Cli\Command\Command;
     use Dez\Cli\IO\Definition;
+    use Dez\Cli\IO\Input;
     use Dez\Cli\IO\Input\Argument;
+    use Dez\Cli\IO\InputArgv;
+    use Dez\Cli\IO\Output;
+    use Dez\Cli\IO\OutputEcho;
 
     /**
      * Class Cli
@@ -27,17 +31,17 @@
          */
         protected $definition;
 
+        protected $input;
+
+        protected $output;
+
         public function __construct() {
-
-            $this->setDefinition( new Definition( [
-                new Argument( 'command', Argument::REQUIRED, 'Command to execute' )
-            ] ) );
-
+            $this->setInput( new InputArgv() )->setOutput( new OutputEcho() );
         }
 
         public function register( $name ) {
             $command    = new Command( $name );
-            $this->add( $command );
+            $this->add( $command->setApplication( $this ) );
             return $command;
         }
 
@@ -108,6 +112,36 @@
             return $this;
         }
 
+        /**
+         * @return Input
+         */
+        public function getInput() {
+            return $this->input;
+        }
 
+        /**
+         * @param Input $input
+         * @return static
+         */
+        public function setInput( Input $input ) {
+            $this->input = $input;
+            return $this;
+        }
+
+        /**
+         * @return Output
+         */
+        public function getOutput() {
+            return $this->output;
+        }
+
+        /**
+         * @param Output $output
+         * @return static
+         */
+        public function setOutput( Output $output ) {
+            $this->output = $output;
+            return $this;
+        }
 
     }
