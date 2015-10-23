@@ -202,6 +202,8 @@
 
             $command    = $this->register( 'about' );
 
+            $command->setDescription( 'Default command about this package' );
+
             $command->setCallback( function( Input $input, Output $output ) {
                 $output->writeln()->writeln( str_repeat( '-', 50 ) );
                 $output->writeln()->writeln( '[info]'. Cli::PACKAGE .'[/info]' );
