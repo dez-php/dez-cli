@@ -1,6 +1,8 @@
 <?php
 
     namespace Dez\Cli\IO;
+    use Dez\Cli\Cli;
+    use Dez\Cli\Command\Command;
 
     /**
      * Class Input
@@ -109,7 +111,7 @@
          * @return array|null
          */
         public function getOption( $name, $default = null ) {
-            return $this->hasOption( $name ) ? $this->options[$name] : $default;
+            return isset( $this->options[ $name ] ) ? $this->options[$name] : $default;
         }
 
         /**

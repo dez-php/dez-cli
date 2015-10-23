@@ -50,6 +50,8 @@
             $output->writeln( sprintf( '[style bg="blue" fg="white"]all options (%s)[/style]', implode( ',', $input->getOptions() ) ) );
         } );
 
+    // php test.php hello 444 --xxx=porno -m test --table=users_table -u root --event="mega party!!!"
+
     class HelloWorldCommand extends Command {
 
         public function __construct( Cli $application ) {
@@ -60,10 +62,15 @@
         public function configure() {
             $this->setName( 'hello' )->setDescription( 'HelloWorldCommand custom command' );
             $this->addArgument( 'number', InputArgument::REQUIRED );
+            $this->addOption( 'model', 'm', InputOption::REQUIRED );
+            $this->addOption( 'table', 't', InputOption::REQUIRED );
+            $this->addOption( 'user', 'u', InputOption::REQUIRED );
+            $this->addOption( 'event', 'e', InputOption::REQUIRED );
             $this->addOption( 'xxx', 'x', InputOption::REQUIRED );
         }
 
         public function execute( Input $input, Output $output ) {
+            var_dump($input->getOptions());
             $output->writeln( sprintf( '[error] Number: %d [/error]', $input->getArgument( 0 ) ) );
             $output->writeln( sprintf( '[info bg="red"] Option: %s [/info]', $input->getOption( 'x' ) ) );
         }

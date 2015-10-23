@@ -87,6 +87,12 @@
                     )
                 ) {
                     throw new CliException( sprintf( 'Required option "%s" not found', $option->getName() ) );
+                } else {
+                    if( ! $input->hasOption( $option->getName() ) ) {
+                        $input->setOption( $option->getName(), $input->getOption( $option->getShort() ) );
+                    } else {
+                        $input->setOption( $option->getShort(), $input->getOption( $option->getName() ) );
+                    }
                 }
             }
 
