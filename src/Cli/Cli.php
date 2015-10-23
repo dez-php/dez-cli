@@ -6,7 +6,6 @@
     use Dez\Cli\IO\Input;
     use Dez\Cli\IO\InputArgv;
     use Dez\Cli\IO\Output;
-    use Dez\Cli\IO\OutputEcho;
     use Dez\Cli\IO\OutputStream;
 
     /**
@@ -47,6 +46,7 @@
          */
         public function __construct() {
             $this->setInput( new InputArgv() )->setOutput( new OutputStream() );
+            $this->registerDefaultCommands();
         }
 
         /**
@@ -173,7 +173,16 @@
                 '[error]  %s  [/error]', "Command not '{$this->getInput()->getCommand()}' not found"
             ) )->writeln();
 
-            $output->writeln( '[info]Available commands![/info]' )->writeln();
+            $this->allCommands();
+
+            return $this;
+        }
+
+        protected function allCommands() {
+            $output     = $this->getOutput();
+
+            $output->writeln( str_repeat( '-', 50 ) );
+            $output->writeln()->writeln( '[info]Registered commands[/info]' )->writeln();
 
             foreach( $this->getCommands() as $command ) {
                 $commandInfo    = '[success]  - %s [/success](%s)';
@@ -181,6 +190,25 @@
             }
 
             $output->writeln();
+            $output->writeln( str_repeat( '-', 50 ) )->writeln();
+
+            return $this;
+        }
+
+        /**
+         * @return $this
+         */
+        protected function registerDefaultCommands() {
+
+            $command    = $this->register( 'about' );
+
+            $command->setCallback( function( Input $input, Output $output ) {
+                $output->writeln()->writeln( str_repeat( '-', 50 ) );
+                $output->writeln()->writeln( '[info]'. Cli::PACKAGE .'[/info]' );
+                $output->writeln( '[info]Version: '. Cli::VERSION .'[/info]' );
+                $output->writeln( 'URL: [style extra="underscore,bold"]'. Cli::URL .'[/style]' )->writeln();
+                $this->allCommands();
+            } );
 
             return $this;
         }
