@@ -21,7 +21,7 @@
 
         protected $configuration;
 
-        public function __construct( $name, array $configuration = [] ) {
+        public function __construct( $name = null, array $configuration = [] ) {
             $this->setConfiguration( new CommandConfiguration(
                 $configuration
             ) )->getConfiguration()->setName( $name );

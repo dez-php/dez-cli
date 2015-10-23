@@ -3,6 +3,7 @@
     namespace CliApp;
 
     use Dez\Cli\Cli;
+    use Dez\Cli\Command\Command;
     use Dez\Cli\Command\CommandConfiguration;
     use Dez\Cli\IO\Colorizer;
     use Dez\Cli\IO\Input;
@@ -48,5 +49,27 @@
             $output->writeln( sprintf( '[style fg="cyan"]all arguments (%s)[/style]', implode( ',', $input->getArguments() ) ) );
             $output->writeln( sprintf( '[style bg="blue" fg="white"]all options (%s)[/style]', implode( ',', $input->getOptions() ) ) );
         } );
+
+    class HelloWorldCommand extends Command {
+
+        public function __construct( Cli $application ) {
+            $this->setApplication( $application );
+            parent::__construct();
+        }
+
+        public function configure() {
+            $this->setName( 'hello' )->setDescription( 'HelloWorldCommand custom command' );
+            $this->addArgument( 'number', InputArgument::REQUIRED );
+            $this->addOption( 'xxx', 'x', InputOption::REQUIRED );
+        }
+
+        public function execute( Input $input, Output $output ) {
+            $output->writeln( sprintf( '[error] Number: %d [/error]', $input->getArgument( 0 ) ) );
+            $output->writeln( sprintf( '[info bg="red"] Option: %s [/info]', $input->getOption( 'x' ) ) );
+        }
+
+    }
+
+    $console->add( new HelloWorldCommand( $console ) );
 
     $console->execute();
