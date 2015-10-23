@@ -4,7 +4,11 @@
 
     use Dez\Cli\CliException;
 
-    class FormatterStyler {
+    /**
+     * Class Colorizer
+     * @package Dez\Cli\IO
+     */
+    class Colorizer {
 
         static protected $foregroundColors = [
             'black'     => 30,
@@ -44,6 +48,12 @@
 
         protected $option;
 
+        /**
+         * @param null $foregroundColor
+         * @param null $backgroundColor
+         * @param array $options
+         * @throws CliException
+         */
         public function __construct( $foregroundColor = null, $backgroundColor = null, array $options = [] ) {
             if( $foregroundColor ) {
                 $this->setForegroundColor( $foregroundColor );
@@ -58,6 +68,10 @@
             }
         }
 
+        /**
+         * @param string $message
+         * @return string
+         */
         public function colorize( $message = '' ) {
 
             $styles = [];
@@ -145,6 +159,7 @@
          * @return static
          */
         public function setOptions( array $option = [] ) {
+            $this->option   = [];
             foreach( $option as $optionItem ) {
                 $this->setOption( $optionItem );
             }
@@ -167,6 +182,29 @@
 
             $this->option[] = static::$options[ $option ];
             return $this;
+        }
+
+        /**
+         * void
+         */
+        static public function testColors() {
+
+            $colorizer  = new Colorizer();
+
+            foreach( static::$foregroundColors as $foregroundName => $foregroundColor ) {
+                foreach( static::$backgroundColors as $backgroundName => $backgroundColor ) {
+                    foreach( static::$options as $optionName => $option ) {
+                        $colorizer
+                            ->setForegroundColor( $foregroundName )
+                            ->setBackgroundColor( $backgroundName )
+                            ->setOptions( [ $optionName ] );
+                        $text   = "fg: {$foregroundName}_$foregroundColor, bg: {$backgroundName}_{$backgroundColor}, extra: {$optionName}";
+                        echo $colorizer->colorize( $text ) . PHP_EOL;
+                    }
+                }
+            }
+
+            return;
         }
 
     }

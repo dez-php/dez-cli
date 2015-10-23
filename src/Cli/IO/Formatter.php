@@ -13,22 +13,27 @@
         /**
          * @var array
          */
-        protected $styles   = [];
+        protected $colorizers   = [];
 
         /**
          * @var string
          */
-        static protected $placeholderRegexp    = '~\{([\w:,?]+)\}(.+)\{\/\w+\}~Uuis';
+        static protected $placeholderRegexp     = '~\[([^]]+)\](.*)\[\/[^]]+]~Uuis';
+
+        /**
+         * @var string
+         */
+        static protected $attrRegexp            = '~(?:(fg|bg|extra)=["\']{1}([a-z,]+)["\']{1})~Uuis';
 
         /**
          * Constructor
          */
         public function __construct() {
-            $this->setStyles( [
-                'info'      => new FormatterStyler( 'green', false, [ 'bold' ] ),
-                'success'   => new FormatterStyler( 'cyan', false, [ 'bold' ] ),
-                'warning'   => new FormatterStyler( 'black', 'yellow', [ 'bold' ] ),
-                'error'     => new FormatterStyler( 'white', 'red', [ 'bold' ] ),
+            $this->setColorizers( [
+                'info'      => new Colorizer( 'green', false, [ 'bold' ] ),
+                'success'   => new Colorizer( 'cyan', false, [ 'bold' ] ),
+                'warning'   => new Colorizer( 'black', 'yellow', [ 'bold' ] ),
+                'error'     => new Colorizer( 'white', 'red', [ 'bold' ] ),
             ] );
         }
 
@@ -40,26 +45,35 @@
 
             $message = preg_replace_callback( static::$placeholderRegexp, function( $matches ) {
 
-                if( strpos( $matches[1], 'style:' ) !== false ) {
+                $styleType      = $matches[1];
+                $tagName        = preg_split( '/\s+/uis', $styleType )[0];
+                $message        = $matches[2];
 
-                    $styleParameters        = array_map( 'trim', explode( ',', str_replace( 'style:', '', $matches[1] ) ) );
-                    $arguments              = [];
-
-                    if( isset( $styleParameters[0] ) ) {
-                        $arguments[]    = array_shift( $styleParameters );
-                    }
-                    if( isset( $styleParameters[0] ) ) {
-                        $arguments[]    = array_shift( $styleParameters );
-                    }
-                    if( $styleParameters ) {
-                        $arguments[]        = $styleParameters;
-                    }
-
-                    return ( new \ReflectionClass( __NAMESPACE__ . '\\FormatterStyler' ) )
-                        ->newInstanceArgs( $arguments )->colorize( $matches[2] );
-                } else if ( isset(  $matches[1]) && in_array( $matches[1], array_keys( $this->getStyles() ) ) ) {
-                    return $this->getStyle( $matches[1] )->colorize( $matches[2] );
+                if( strpos( $tagName, 'style' ) === 0 ) {
+                    $colorizer  = new Colorizer();
+                } else if ( in_array( $tagName, array_keys( $this->getColorizers() ) ) ) {
+                    $colorizer = clone $this->getColorizer( $tagName );
+                } else {
+                    return $message;
                 }
+
+                if( preg_match( static::$attrRegexp, $styleType ) ) {
+                    preg_match_all( static::$attrRegexp, $styleType, $attributes );
+                    if( isset( $attributes[1] ) && count( $attributes[1] ) > 0 ) {
+                        foreach( $attributes[1] as $index => $attributeName ) {
+                            if( $attributeName == 'fg' ) {
+                                $colorizer->setForegroundColor( $attributes[2][$index] );
+                            } else if( $attributeName == 'bg' ) {
+                                $colorizer->setBackgroundColor( $attributes[2][$index] );
+                            } else if( $attributeName == 'extra' ) {
+                                $options    = explode( ',', $attributes[2][$index] );
+                                $colorizer->setOptions( $options );
+                            }
+                        }
+                    }
+                }
+
+                return $colorizer->colorize( $message );
 
             }, $message );
 
@@ -69,30 +83,42 @@
         /**
          * @return array
          */
-        public function getStyles() {
-            return $this->styles;
+        public function getColorizers() {
+            return $this->colorizers;
         }
 
         /**
          * @param $name
-         * @return FormatterStyler
+         * @return Colorizer
          * @throws CliException
          */
-        public function getStyle( $name ) {
+        public function getColorizer( $name ) {
 
-            if( ! isset( $this->styles[ $name ] ) ) {
-                throw new CliException( sprintf( 'Style "%s" not defined for formatter', $name ) );
+            if( ! isset( $this->colorizers[ $name ] ) ) {
+                throw new CliException( sprintf( 'Colorizer "%s" not defined for formatter', $name ) );
             }
 
-            return $this->styles[ $name ];
+            return $this->colorizers[ $name ];
         }
 
         /**
-         * @param array $styles
+         * @param $name
+         * @param Colorizer $colorizer
          * @return static
          */
-        public function setStyles( array $styles = [] ) {
-            $this->styles = $styles;
+        public function setColorizer( $name, Colorizer $colorizer ) {
+            $this->colorizers[ $name ] = $colorizer;
+            return $this;
+        }
+
+        /**
+         * @param array $colorizers
+         * @return static
+         */
+        public function setColorizers( array $colorizers = [] ) {
+            foreach( $colorizers as $name => $colorizer ) {
+                $this->setColorizer( $name, $colorizer );
+            }
             return $this;
         }
 

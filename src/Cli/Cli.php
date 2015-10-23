@@ -3,12 +3,11 @@
     namespace Dez\Cli;
 
     use Dez\Cli\Command\Command;
-    use Dez\Cli\IO\Definition;
     use Dez\Cli\IO\Input;
-    use Dez\Cli\IO\Input\Argument;
     use Dez\Cli\IO\InputArgv;
     use Dez\Cli\IO\Output;
     use Dez\Cli\IO\OutputEcho;
+    use Dez\Cli\IO\OutputStream;
 
     /**
      * Class Cli
@@ -16,29 +15,44 @@
      */
     class Cli {
 
+        const VERSION   = '1.0.0';
+
+        const PACKAGE   = 'CLI Component';
+
+        const URL       = 'https://github.com/dez-php/dez-cli';
+
+
         /**
          * @var array
          */
         protected $commands = [];
 
         /**
-         * @var
+         * @var string
          */
         protected $name;
 
         /**
-         * @var
+         * @var Input
          */
-        protected $definition;
-
         protected $input;
 
+        /**
+         * @var Output
+         */
         protected $output;
 
+        /**
+         *
+         */
         public function __construct() {
-            $this->setInput( new InputArgv() )->setOutput( new OutputEcho() );
+            $this->setInput( new InputArgv() )->setOutput( new OutputStream() );
         }
 
+        /**
+         * @param $name
+         * @return Command
+         */
         public function register( $name ) {
             $command    = new Command( $name );
             $this->add( $command->setApplication( $this ) );
@@ -93,22 +107,6 @@
          */
         public function setName( $name ) {
             $this->name = $name;
-            return $this;
-        }
-
-        /**
-         * @return mixed
-         */
-        public function getDefinition() {
-            return $this->definition;
-        }
-
-        /**
-         * @param mixed $definition
-         * @return static
-         */
-        public function setDefinition( Definition $definition ) {
-            $this->definition = $definition;
             return $this;
         }
 

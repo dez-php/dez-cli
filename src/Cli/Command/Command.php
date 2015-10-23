@@ -17,13 +17,10 @@
 
         protected $callback;
 
-        protected $definition;
-
         protected $application;
 
         public function __construct( $name ) {
             $this->setName( $name );
-            $this->setDefinition( new Definition() );
             $this->configure();
         }
 
@@ -51,6 +48,8 @@
             $this->initialize();
 
             $input  = $this->getApplication()->getInput();
+
+            var_dump($input);die;
 
             $definition     = $this->getDefinition();
 
@@ -104,7 +103,7 @@
 
             foreach( $error as & $errorLine ) {
                 $errorLine  = str_pad( $errorLine, $maxLength, ' ', STR_PAD_RIGHT );
-                $errorLine  = sprintf( '{error}%s{/error}', $errorLine );
+                $errorLine  = sprintf( '  [error]%s[/error]', $errorLine );
             }
 
             foreach( $exception->getTrace() as $trace ) {
@@ -118,9 +117,9 @@
                 $line       = isset( $trace['line'] ) ? $trace['line'] : 'null';
 
                 $traces[] = sprintf(
-                    '   %s @ %s',
-                    "{style:blue,black} {$class}{$type}{$function}() {/style}",
-                    "{style:green,black,underscore,bold}{$file}:{$line}{/style}"
+                    '  [style fg="blue" extra="bold"]%s [/style] @ [style fg="green" extra="underscore,bold"]%s[/style]',
+                    "{$class}{$type}{$function}()",
+                    "{$file}:{$line}"
                 );
             }
 
