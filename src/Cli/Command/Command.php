@@ -4,8 +4,10 @@
 
     use Dez\Cli\Cli;
     use Dez\Cli\CliException;
+    use Dez\Cli\IO\Input;
     use Dez\Cli\IO\InputArgument;
     use Dez\Cli\IO\InputOption;
+    use Dez\Cli\IO\Output;
 
     class Command {
 
@@ -37,7 +39,7 @@
         /**
          * @throws CliException
          */
-        public function execute() {
+        public function execute( Input $input, Output $output ) {
             throw new CliException( 'Calling execute() can be from extended command' );
         }
 
@@ -91,7 +93,7 @@
             $callback   = $this->getCallback();
 
             if( ! $callback ) {
-                $this->execute();
+                $this->execute( $input, $output );
             } else if( $callback instanceof \Closure ) {
                 call_user_func_array( $callback, [ $input, $output ] );
             } else {
